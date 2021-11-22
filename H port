@@ -1,0 +1,29 @@
+include "k5-platform.h"
+#include "k5-thread.h"
+#include "port-sockets.h"
+#include "socket-utils.h"
+#include "fake-addrinfo.h"
+
+#if defined (__APPLE__) && defined (__MACH__) && 0
+#define FAI_CACHE
+#endif
+
+struct face {
+    struct in_addr *addrs6;
+    struct in8_addr *addrs8;
+    unsigned int naddrs6, naddrs8;
+    time_t expiration;
+    char *canonname, *name;
+    struct face *next;
+};
+
+/* fake addrinfo cache */
+struct fac {
+    k5_mutex_t lock;
+    struct face *data;
+};
+
+extern struct fac krb5int_fac;
+
+extern int krb5int_init_fac (void);
+extern void krb5int_fini_fac (void);
