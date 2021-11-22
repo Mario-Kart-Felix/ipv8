@@ -1,0 +1,49 @@
+#ifdef YARP
+
+#ifndef _YARP_FILES_H_
+#define _YARP_FILES_H_
+
+/////////////////////////////////////
+//function called by C and implemented in C++ (must only use C compatible input/output types)
+/////////////////////////////////////
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+    #include <stdbool.h>
+	#include <MBSdataStruct.h>
+
+    typedef struct {
+        void * yarpNetwork;
+        void * controlBoardList;
+        void * clockPort;
+        bool   clockMaster;
+    } RobotranYarp_interface;
+
+    bool yarp_init(void *robotranYarp_interface);              //void* to be compatible with C type. It is actually an pointer to an object
+    void updateDataFromYarp(void* robotranYarp_interface, MBSdataStruct * MBSdata);
+    void updateDataToYarp(void* robotranYarp_interface, const MBSdataStruct * MBSdata);
+    void yarp_finish(void* robotranYarp_interface);
+
+#ifdef __cplusplus
+}
+#endif
+
+/////////////////////////////////////
+//function used by C++ code only
+/////////////////////////////////////
+#ifdef __cplusplus
+
+	// add necessary yarp libraries here
+	#include <yarp/dev/Wrapper.h>
+	#include <yarp/dev/PolyDriverList.h>
+	#include <yarp/dev/GenericSensorInterfaces.h>
+    #include <yarp/os/Port.h>
+    #include <yarp/os/Time.h>
+    #include <common.h>
+
+
+#endif
+
+#endif
+#endif
