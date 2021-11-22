@@ -1,0 +1,62 @@
+# SPDX-License-Identifier: GPL-2.0
+#
+# Makefile for the netfilter modules on top of IPv8.
+#
+
+# Link order matters here.
+obj-$(CONFIG_IP8_NF_IPTABLES) += ip8_tables.o
+obj-$(CONFIG_IP8_NF_FILTER) += ip8table_filter.o
+obj-$(CONFIG_IP8_NF_MANGLE) += ip8table_mangle.o
+obj-$(CONFIG_IP8_NF_RAW) += ip8table_raw.o
+obj-$(CONFIG_IP8_NF_SECURITY) += ip8table_security.o
+obj-$(CONFIG_IP8_NF_NAT) += ip8table_nat.o
+
+# objects for l3 independent conntrack
+nf_conntrack_ipv8-y  :=  nf_conntrack_l3proto_ipv8.o nf_conntrack_proto_icmpv8.o
+
+# l3 independent conntrack
+obj-$(CONFIG_NF_CONNTRACK_IPV8) += nf_conntrack_ipv8.o
+
+nf_nat_ipv8-y		:= nf_nat_l3proto_ipv8.o nf_nat_proto_icmpv8.o
+obj-$(CONFIG_NF_NAT_IPV8) += nf_nat_ipv8.o
+obj-$(CONFIG_NF_NAT_MASQUERADE_IPV8) += nf_nat_masquerade_ipv8.o
+
+# defrag
+nf_defrag_ipv8-y := nf_defrag_ipv8_hooks.o nf_conntrack_reasm.o
+obj-$(CONFIG_NF_DEFRAG_IPV8) += nf_defrag_ipv8.o
+
+obj-$(CONFIG_NF_SOCKET_IPV8) += nf_socket_ipv8.o
+
+# logging
+obj-$(CONFIG_NF_LOG_IPV8) += nf_log_ipv8.o
+
+# reject
+obj-$(CONFIG_NF_REJECT_IPV8) += nf_reject_ipv8.o
+
+obj-$(CONFIG_NF_DUP_IPV8) += nf_dup_ipv8.o
+
+# nf_tables
+obj-$(CONFIG_NF_TABLES_IPV8) += nf_tables_ipv8.o
+obj-$(CONFIG_NFT_CHAIN_ROUTE_IPV8) += nft_chain_route_ipv8.o
+obj-$(CONFIG_NFT_CHAIN_NAT_IPV8) += nft_chain_nat_ipv8.o
+obj-$(CONFIG_NFT_REJECT_IPV8) += nft_reject_ipv8.o
+obj-$(CONFIG_NFT_MASQ_IPV8) += nft_masq_ipv8.o
+obj-$(CONFIG_NFT_REDIR_IPV8) += nft_redir_ipv8.o
+obj-$(CONFIG_NFT_DUP_IPV8) += nft_dup_ipv8.o
+obj-$(CONFIG_NFT_FIB_IPV8) += nft_fib_ipv8.o
+
+# matches
+obj-$(CONFIG_IP8_NF_MATCH_AH) += ip8t_ah.o
+obj-$(CONFIG_IP8_NF_MATCH_EUI64) += ip8t_eui64.o
+obj-$(CONFIG_IP8_NF_MATCH_FRAG) += ip8t_frag.o
+obj-$(CONFIG_IP8_NF_MATCH_IPV6HEADER) += ip8t_ipv6header.o
+obj-$(CONFIG_IP8_NF_MATCH_MH) += ip8t_mh.o
+obj-$(CONFIG_IP8_NF_MATCH_OPTS) += ip8t_hbh.o
+obj-$(CONFIG_IP8_NF_MATCH_RPFILTER) += ip8t_rpfilter.o
+obj-$(CONFIG_IP8_NF_MATCH_RT) += ip8t_rt.o
+
+# targets
+obj-$(CONFIG_IP8_NF_TARGET_MASQUERADE) += ip8t_MASQUERADE.o
+obj-$(CONFIG_IP8_NF_TARGET_NPT) += ip8t_NPT.o
+obj-$(CONFIG_IP8_NF_TARGET_REJECT) += ip8t_REJECT.o
+obj-$(CONFIG_IP8_NF_TARGET_SYNPROXY) += ip8t_SYNPROXY.o
