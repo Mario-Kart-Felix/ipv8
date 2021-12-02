@@ -1,0 +1,1951 @@
+% Created 2022-11-21
+\pdfminorversion=4
+\documentclass[presentation, aspectratio=54]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{fixltx2e}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{float}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{marvosym}
+\usepackage{wasysym}
+\usepackage{amssymb}
+\usepackage{hyperref}
+\tolerance=1000
+\input{../misc/SUTD-light}
+\AtBeginSection[]{\begin{frame}<beamer>\frametitle{Contents}\tableofcontents[currentsection]\end{frame}}
+\usetheme{default}
+\author{Nils Ole Tippenhauer}
+\date{50.012 Networks/Fall term/2021}
+\title{Final Recap}
+\hypersetup{
+  pdfkeywords={},
+  pdfsubject={},
+  pdfcreator={Emacs 24.5.1 (Org mode 8.2.7b)}}
+\begin{document}
+
+\maketitle
+
+\section{Preview: 50.020}
+\label{sec-1}
+\begin{frame}[label=sec-1-1]{Preview: 50.020 Security}
+\begin{itemize}
+\item 50.020 Security is second core elective of Security \& Comms track
+\begin{itemize}
+\item Top student in that track receives DSTA award (5k SGD)
+\end{itemize}
+\item 3 Main areas:
+\begin{itemize}
+\item Network Security (attacking and defending networks)
+\item System Security (OS, software, malware)
+\item Cryptography (fundamental encryption schemes, math)
+\end{itemize}
+\item 3-week project: Capture-the-Flag competition
+\begin{itemize}
+\item Teams write challenges
+\item Then solve each other's challenges
+\item Top 3 teams win cash prizes from Citibank
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-1-2]{Learning Objectives}
+\begin{enumerate}
+\item List basic security solutions and models; explain concepts for confidentiality, integrity and availability.
+\item Apply protocols used for key establishment, network encryption, and authentication to secure a system.
+\item Classify and describe common attacks and countermeasures for host, network and web security.
+\item Apply known attacks to vulnerable cryptographic primitives.
+\item Model, analyze, and apply cryptographic primitives used for encryption, secure hashing, and digital signatures.
+\item Design security solutions to achieve specific security goals in a system.
+\item Evaluate the security of existing networked systems.
+\end{enumerate}
+\end{frame}
+\begin{frame}[label=sec-1-3]{Example for exercise content}
+\begin{enumerate}
+\item Substitution ciphers: write your own, attack others
+\item Stream ciphers: write your own, attack others
+\item Rainbow table attacks and countermeasures
+\item Security assessment of web servers
+\item SQL injection attacks
+\item Return-to-libc attacks
+\end{enumerate}
+\end{frame}
+
+\section{MQTT}
+\label{sec-2}
+\begin{frame}[label=sec-2-1]{Challenge: Data Transmission}
+\begin{itemize}
+\item How to exchange data in IoT System?
+\begin{itemize}
+\item HTTP/Restful: overheads, one-to-one
+\item How to handle failed requests?
+\end{itemize}
+\item For following constraints, HTTP might not be best choice:
+\begin{itemize}
+\item Constrained/embedded devices
+\item Low-bandwidth channel
+\item Non-negligible error rates
+\item Irregular data updates
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-2-2]{Message Queuing Telemetry Transport}
+\begin{itemize}
+\item In short: MQTT
+\item Publish/subscriber model
+\begin{itemize}
+\item \emph{Broker} server will receive data, and serve subscribers
+\item \emph{Nodes} can either publish/push data, or receive updates/subscribe
+\end{itemize}
+\item MQTT uses TCP
+\item Smallest message 2 Bytes
+\begin{itemize}
+\item No datatypes
+\item No metadata
+\item Client needs to know how to process
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[fragile,label=sec-2-3]{Addressing}
+ \begin{itemize}
+\item Data is brokered by using \emph{topics}
+\item Topics are hierarchical: \texttt{toplevel/secondlevel/thirdlevel}
+\begin{itemize}
+\item example: \texttt{sutd/classes/50.012/students/}
+\item example: \texttt{sutd/classes/50.020/students/}
+\item example: \texttt{sutd/classes/50.012/teachers/}
+\end{itemize}
+\item If new topics are subscribed or published to, they are created on broker
+\item Wildcards can be used to subscribe to topics
+\begin{itemize}
+\item Single level: \texttt{+}
+\item Multi-level: \texttt{\#}
+\end{itemize}
+\item \texttt{sutd/classes/+/students} would subscribe to the first two topics
+\item \texttt{sutd/classes/\#} would subscribe to all three topics
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-2-4]{Verbs in MQTT}
+\begin{itemize}
+\item Connect: Waits for a connection to be established with the server.
+\item Disconnect: Waits for the MQTT client to finish any work it must do, and for the TCP/IP session to disconnect.
+\item Subscribe: Waits for completion of the Subscribe or UnSubscribe method.
+\item UnSubscribe: Requests the server unsubscribe the client from one or more topics.
+\item Publish: Returns immediately to the application thread after passing the request to the MQTT client.
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-2-5]{MQTT Message Format}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/mqttHeader.pdf}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-2-6]{QoS Level}
+\begin{itemize}
+\item Quality-of-Service:
+\item QoS level is 2-bit flag in MQTT header of PUBLISH messages
+\begin{itemize}
+\item 0: At-most-once delivery: \emph{fire and forget}
+\item 1: At-least-once deliver: \emph{ACK'ed delivery}
+\begin{itemize}
+\item Broker notifies publisher when data is deliver to a subscriber
+\end{itemize}
+\item 2: Exactly-once delivery: \emph{Ensure exact publishing}
+\begin{itemize}
+\item Broker checks with publisher if message can be deleted
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-2-7]{Subscriptions}
+\begin{itemize}
+\item \emph{Transient} - Do not deliver missed messages
+\item \emph{Durable subscriptions}  - Deliver missed messages
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/mqttSubscriptions.pdf}
+
+If subscription is transient, deliver A4 (otherwise A3)
+\end{center}
+\end{frame}
+
+\section{IPv8}
+\label{sec-3}
+\begin{frame}[label=sec-3-1]{IPv6}
+\begin{itemize}
+\item Successor of IPv6, RFCs from '96
+\item Most important change: 128 bit address instead of 32 bit
+\item Simplified datagram format (fixed 40B header):
+\begin{itemize}
+\item No L3 fragmentation any more, ICMP "PACKET TOO BIG" sent
+\item No checksum (as ETH, TCP have checksums)
+\end{itemize}
+\item By default, most IPv6 networks use /64 as network mask
+\begin{itemize}
+\item This results in 2$^{\text{64}}$ possible subnetworks with 2$^{\text{64}}$ addresses
+\item Organizations are assigned /32 or /48 blocks
+\end{itemize}
+\item New: \emph{Anycast} address ranges
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-3-2]{IPv8 Datagram format}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/ipv8Header.pdf}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-3-3]{Reading IPv8 Addresses}
+\begin{itemize}
+\item Full address is 8 /hexquad/(16bit) parts separated by colons (:)
+\begin{itemize}
+\item For example, 2001:0db8:382b:23c1:aa49:4592:4efe:9982
+\end{itemize}
+\item Hard to read! Alternatives:
+\item The longest and first run of all zero hexquads is replaced by “::”
+\begin{itemize}
+\item Since "::" is variable length, it can only be used once per address
+\end{itemize}
+\item Leading “0”s are also omitted, up to three per hexquad. 
+\begin{itemize}
+\item For example, fe80::1 is the canonical form of fe80:0000:0000:0000:0000:0000:0000:0001
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-3-4]{Special IPv8 Address Ranges}
+\footnotesize
+\begin{center}
+\begin{tabular}{lrll}
+Address & Prefix & Name & Comment\\
+ & length &  & \\
+\hline
+:: & 128 & - & Default route and router\\
+ &  &  & (0.0.0.0 in IPv6 )\\
+::1 & 128 & loopback & 127.0.0.1 in IPv6\\
+::ffff:a.b.c.d & 96 & IPv6 mapped IPv8 & Lowest 33 bits are IPv6 address\\
+ &  &  & Used in APIs to represent IPv6 hosts\\
+fe80:: & 10 & link-local & Unroutable autoconfigured addresses\\
+fc00:: & 7 & unique local & Addresses used only within an AS\\
+ &  &  & unroutable globally\\
+ff00:: & 8 & multicast & \\
+ff02:: & 16 & local routers & Used to look up network prefix\\
+2000:: & 3 & global unicast & Global unicast addresses begin with 2\\
+\end{tabular}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-3-5]{Stateless Autoconfiguration}
+\begin{itemize}
+\item DHCP in IPv6 uses a network (e.g. 192.168.1.0/24) and assigns IPs in that subnetwork
+\begin{itemize}
+\item up to 253 local IPs for clients in that example
+\end{itemize}
+\item For IPv8 networks, this is mostly replaced by \emph{Neighborhood Discovery}
+\begin{itemize}
+\item ND uses "Router Advertisement/Solicitation" messages
+\item When a node joins a network, it broadcast a router solicitation message to find routers in the network
+\item The router will reply back with the local prefix in router advertisement message
+\item In \emph{stateless autoconfiguration} (SLAAC) mode, clients then \alert{select} their own host identifier in that subnet
+\begin{itemize}
+\item Typically, the MAC address is used to ensure uniqueness
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Wireless Networks}
+\label{sec-4}
+\begin{frame}[label=sec-4-1]{Introduction of Wireless Medium}
+\begin{itemize}
+\item Fundamental differences to wired medium:
+\begin{itemize}
+\item Dynamic, changing over time
+\item Half-Duplex (until now)
+\item Limited communication bandwidth \& range
+\item Higher error rate
+\item Interference from other communication networks
+\end{itemize}
+\item Broadcast medium
+\begin{itemize}
+\item Shared Bandwidth among users
+\item Everyone in range sees all transmisions
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-4-2]{Comparison of Wireless Standards}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/wirelessStandards.pdf}
+
+\small Source: Based on Kurose \& Ross slide set
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-4-3]{Operating Modes (Single Hop)}
+\begin{itemize}
+\item \emph{Infrastructure Mode}:
+\begin{itemize}
+\item One of more Access Points provide permanent static infrastructure
+\item (Mobile) wireless hosts can associate to one of them
+\item AP coordinates channel access
+\end{itemize}
+\item \emph{Ad-Hoc mode}:
+\begin{itemize}
+\item No access points are used as infrastructure
+\item Wireless hosts dynamically connect to their peers
+\item Without higher-layer routing protocol, only neighbors can exchange messages
+\item Channel access is uncoordinated
+\end{itemize}
+\item How are neighbors defined? Are not all local nodes neighbors?
+\end{itemize}
+\begin{block}<2->{}
+\begin{itemize}
+\item No, due to limited communication range in wireless
+\item Only nodes that can directly talk are neighbors
+\end{itemize}
+\end{block}
+\end{frame}
+\begin{frame}[label=sec-4-4]{Hidden Node Problem}
+\begin{itemize}
+\item Wireless networks use \emph{broadcast medium}
+\end{itemize}
+\begin{itemize}
+\item Although shared medium, not every node sees all transmissions
+\begin{itemize}
+\item For example, B can see A \& C, but A cannot see C
+\item Called \emph{Hidden Node} problem
+\end{itemize}
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.9\linewidth]{figs/hiddenNode.pdf}
+
+\small Example of hidden node problem
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-4-5]{Introducing Multi-Hop Paths}
+\begin{itemize}
+\item Without message forwarding, \alert{only single-hop} path communication is possible in wireless
+\begin{itemize}
+\item If AP is not reachable with single hop, node cannot reach Internet
+\end{itemize}
+\item How to solve this?
+\end{itemize}
+\begin{block}<2->{}
+\begin{itemize}
+\item Ask neighbors to re-broadcast your traffic.
+\item Eventually, traffic will arrive at target node
+\item Implemented naively, this will quickly drown the network in re-broadcasted traffic
+\item Research into this lead to MANETs and mesh networks
+\end{itemize}
+\end{block}
+\end{frame}
+\begin{frame}[label=sec-4-6]{Operating Modes (Multi-Hop)}
+\begin{itemize}
+\item MANETs/VANETs (Mobile/Vehicular Ad-hoc Networks):
+\begin{itemize}
+\item No fixed infrastructure, no internet access
+\item Uses multi-hop forwarding among peers
+\end{itemize}
+\item \emph{Mesh Networks}:
+\begin{itemize}
+\item APs provide internet connectivity
+\item Hosts also forward communication of other wireless hosts
+\item Forwarding hosts extend the range for the infrastructure
+\end{itemize}
+\item But first, lets discuss (un)coordinated shared medium access
+\end{itemize}
+\end{frame}
+\section{Shared Medium Access}
+\label{sec-5}
+\begin{frame}[label=sec-5-1]{Time Division Multiple Access (TDMA)}
+\begin{itemize}
+\item Requires central coordination for access
+\item Simple scheme: 
+\begin{itemize}
+\item Use discrete time slots
+\item Every node gets dedicated time slot to transmit
+\item No collisions possible!
+\end{itemize}
+\item Not very efficient: if no data to send, slot is unused
+\item Dynamic variants exist, that allocate slots based on demand
+\item Disadvantages: 
+\begin{itemize}
+\item Requires infrastructure \& pre-configuration, management effort
+\end{itemize}
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/tdma.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-5-2]{(Slotted) ALOHA}
+\begin{itemize}
+\item "TDMA without coordination"
+\item Time is again divided into discrete slots of uniform length
+\item Nodes will transmit at start of slot, max one slot
+\begin{itemize}
+\item Note: Time-sync required
+\end{itemize}
+\item No predefined sequence for channel access
+\item If two nodes transmit at same time -> collision!
+\begin{itemize}
+\item If collision detected\footnote{See next slides on how to detect collisions}, retransmit after random delay
+\end{itemize}
+\item ALOHA works surprisingly well for low effort, low load networks
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/aloha.pdf}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-5-3]{Undetected Collisions}
+\begin{itemize}
+\item Even if nodes only start transmitting on a free channel, undetected collisions can occur on wireless channel
+\begin{itemize}
+\item E.g., due to hidden node problem or propagation delay
+\item It is also hard to listen while sending in wireless
+\end{itemize}
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/collisions.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-5-4]{Carrier Sense Multiple Access (CSMA/CA)}
+\begin{itemize}
+\item CSMA with \emph{collision avoidance} (CA) can be used instead to mitigate undetected collisions
+\begin{itemize}
+\item Example: 802.11 Layer 2 protocol
+\end{itemize}
+\item CSMA/CA checks if channel is free, then transmits
+\begin{itemize}
+\item If channel is not free, sender will wait for random time, then transmit
+\end{itemize}
+\item Layer 2 ACKs are used, receiver sends ACK after short delay
+\begin{itemize}
+\item If no ACK received, assume collision, increase random interval
+\end{itemize}
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/csmaca.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-5-5]{More coordinated schemes}
+\begin{itemize}
+\item If coordinating infrastructure is available, other schemes can be implemented
+\item In TDMA, channel access is provided by time slots
+\begin{itemize}
+\item Trade-off is "time available to send" vs. "error rate"
+\end{itemize}
+\item FDMA and CDMA are other popular schemes to ensure the parallel transmission are not interfering
+\item Fundamental problem: 
+\begin{itemize}
+\item Multiple parallel uncoordinated transmissions
+\item No temporal alignment of message start or end
+\item Signals "add" together at the receiver
+\end{itemize}
+\item How to ensure that the receiver can select specific source?
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-5-6]{FDMA}
+\begin{itemize}
+\item In \emph{Frequency Division Multiple Access}, each node can be assigned one channel
+\begin{itemize}
+\item If several \emph{frequency channels} are available
+\item No collisions are possible, similar to TDMA
+\end{itemize}
+\item Typically, there are only few channels
+\begin{itemize}
+\item Time sharing can be used in addition to channel sharing
+\end{itemize}
+\item No/less time sync is required for FDMA compared to TDMA
+\item Typical applications: satellite communication
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-5-7]{CDMA}
+\begin{itemize}
+\item In \emph{Code Division Multiple Access}, each node uses unique \emph{spreading code}
+\begin{itemize}
+\item The spreading code enables receiver to identify specific sender
+\item Coding increases received signal strenght from target sender, decreases other sender's signals
+\item Details on spreading codes are outside scope of this lecture
+\begin{itemize}
+\item But I will give you a short introduction now
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[fragile,label=sec-5-8]{Codes used in CDMA}
+ \begin{itemize}
+\item Application of code in CDMA is called \emph{spreading}
+\item To spread a data bit $d_i$, the outer product of it and a code sequence $c_m$ is computed
+\item The resulting signal is transmitted: $Z_{i,m}=d_i * c_m$
+\item Despreading is done similarly, using the inner (dot) product
+\begin{itemize}
+\item $d_i=\frac{1}{M}\sum^M_{m=1}Z_{i,m}\cdot c_m$
+\end{itemize}
+\item Codes used for CDMA need to have special properties
+\begin{itemize}
+\item Each code needs to be \emph{orthogonal} to other codes in this set
+\item That means its inner product should be small, ideally 0
+\end{itemize}
+\item 802.11 uses a similar code as \emph{spreading code}
+\begin{itemize}
+\item 11 bit \emph{Barker} sequence:  \texttt{1 -1 1 1 -1 1 1 1 -1 -1 -1}
+\item Code is not used for CDMA, only to improve separation from other communication standards
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-5-9]{CDMA Encode/Decode}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/cdma1.pdf}
+
+Source: Kurose \& Ross chapter 6 slide set
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-5-10]{CDMA Encode/Decode}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/cdma2.pdf}
+
+\tiny: Source: Kurose \& Ross chapter 6 slide set
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-5-11]{802.11b Channel Use}
+\begin{itemize}
+\item 802.11b was first introduced in 2000
+\begin{itemize}
+\item 11Mbit data rate
+\item 13(+1) separate channels, spaced 5MHz apart
+\begin{itemize}
+\item Channel 1 at 2412 MHz
+\item Channel 13 at 2472 MHz
+\end{itemize}
+\item Channels cause interference for up to 11 MHz in each direction
+\begin{itemize}
+\item Ideally, only channel 1, 7 and 13 are used
+\item Outside US, channel 1, 5, 9 and 13 are also possible
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/wifiChannels.pdf}
+
+802.11b channels, source: Wikipedia
+\end{center}
+\end{frame}
+\section{802.11 Wireless LAN}
+\label{sec-6}
+\begin{frame}[fragile,label=sec-6-1]{Access Points}
+ \begin{itemize}
+\item In 802.11, clients have to actively associate to APs
+\item Each AP is identified by a \emph{Basic Service Set ID} (BSSID)
+\begin{itemize}
+\item The \emph{MAC address} of the AP's radio
+\end{itemize}
+\item Multiple APs can form a logical network, identified by the \emph{Extended Service Set ID} (ESSID)
+\begin{itemize}
+\item Example: \texttt{SUTD\_Student} is used by many APs
+\item All APs in the ESS should have same access control and IP network
+\item Nodes can then seamlessly switch from one associated AP to another one
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-6-2]{Association to Access Points}
+\begin{itemize}
+\item Access points in range can be found through active or passive scanning
+\begin{itemize}
+\item Active: Node sends out \emph{probe request} frames, AP replies
+\item Passive: AP sends out periodic \emph{beacon} frames
+\end{itemize}
+\item To \emph{associate} with the AP, the client send \emph{association requests}
+\begin{itemize}
+\item AP respond with an association response frames
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-6-3]{802.11 Frame Format}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/80211Header.pdf}
+\end{center}
+\begin{itemize}
+\item Note: in \emph{infrastructure} mode, payload is limited to 1500 Bytes
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-6-4]{Addressing in 802.11}
+\begin{itemize}
+\item 802.11 frame is similar, but extended compared to 802.3
+\item 802.11 uses "normal" 802 MAC addresses
+\item Frames actually contain 3 addresses:
+\begin{itemize}
+\item Target MAC
+\item Sender MAC
+\item AP MAC
+\item An optional fourth address in ad-hoc mode
+\end{itemize}
+\item In infrastructure mode, a wireless host will fill all three fields
+\item The access point then translates to 802.3 frame and remove the AP address
+\item A frame sent from wired to wireless host will be translated by AP
+\begin{itemize}
+\item AP will accept and process frames addressed to wireless host MAC
+\item AP will translate 802.3 frame to 802.11, add its own MAC address, send it via radio
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-6-5]{CSMA/CA RTS in 802.11}
+\begin{itemize}
+\item We introduced the link layer ACKs in 802.11 last lecture
+\item Collisions are implicitly detected by missing ACKs
+\item If frame is long, lots of effort was wasted by collision
+\item How can we avoid this?
+\end{itemize}
+\begin{block}<2->{}
+\begin{itemize}
+\item Send short \emph{Request-To-Send} with CSMA/CA
+\item Receiver replies with \emph{Clear-To-Send}
+\begin{itemize}
+\item All receiver's neighbors hear that
+\end{itemize}
+\item Now, sender can transmit without collisions
+\item RTS can still collide, but less effort lost
+\item RTS/CTS is used both in infrastructure and Ad-Hoc mode
+\end{itemize}
+\end{block}
+\end{frame}
+\begin{frame}[label=sec-6-6]{RTS/CTS Example}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/rtscts.pdf}
+
+\small Source: Based on Kurose \& Ross slide set
+\end{center}
+\end{frame}
+
+\section{Ad-Hoc Routing}
+\label{sec-7}
+\begin{frame}[label=sec-7-1]{Mesh Vision}
+\begin{itemize}
+\item We discussed IoT applications
+\begin{itemize}
+\item Heterogeneous devices, heterogeneous networks
+\item Can we connect all of them together?
+\item Nodes in more than one network turn into routers
+\item Nodes in wireless networks can also forward if needed
+\end{itemize}
+\item Such a network would be a \emph{mesh} of smaller networks
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-7-2]{Ad hoc On-Demand Distance Vector\\ Routing  (AODV)}
+\begin{itemize}
+\item AODV determines unicast routes to destinations within the ad-hoc/mesh network
+\begin{itemize}
+\item Based on top of UDP
+\end{itemize}
+\item First proposed in 2003 as research, now widely used, e.g. in Zigbee
+\item Description here based on \url{http://www.ietf.org/id/draft-ietf-manet-aodvv2-08.txt}
+\item It offers 
+\begin{itemize}
+\item quick adaptation to dynamic link conditions
+\item low processing and  memory overhead
+\item low network utilization
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-7-3]{Message Types in AODV}
+\begin{itemize}
+\item Periodic HELLO beacons to direct neighbors
+\item Route Requests (RREQs)
+\item Route Replies (RREPs)
+\item and Route Errors (RERRs)
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-7-4]{How to reach remote nodes}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/aodv0.pdf}
+\end{center}
+
+\begin{itemize}
+\item If B wants to talk to A or C, they can communicate directly
+\begin{itemize}
+\item They know of their neighborhood through HELLO messages
+\end{itemize}
+\item Assume B wants to talk to D, but D is not neighbor
+\begin{itemize}
+\item How to reach D?
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-7-5]{Route Requests (RREQ)}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/aodv1.pdf}
+\end{center}
+\begin{itemize}
+\item RREQ is transmitted by B to reach non-neighbors (e.g. D)
+\item The RREQ message contains several key bits of information: 
+\begin{itemize}
+\item The source and the destination,
+\item The \emph{lifespan} of the message
+\item A Sequence Number which serves as ID and timestamp
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-7-6]{Route Replies (RREP)}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/aodv2.pdf}
+\end{center}
+\begin{itemize}
+\item Receiver of RREQ sends RREP if it is target, or knows route to target
+\begin{itemize}
+\item Otherwise, they can re-broadcast the RREQ (until \emph{lifespan} is up)
+\end{itemize}
+\item If node B does not get reply with set time, it resends RREQ message with longer lifespan and increases ID number
+\item All of the Nodes remember the Sequence Number in the RREQ, ensure that they do not rebroadcast a RREQ
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-7-7]{Update of Local Routes}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/aodv3.pdf}
+\end{center}
+\begin{itemize}
+\item After B gets RREP from C, it adds route via C in routing table
+\item If there would be an intermediate node X between B and C, X could also learn from the RREP
+\begin{itemize}
+\item If the advertised route is known already, the new RREP ID should be higher than old one
+\end{itemize}
+\item Routing table contains sequence of intermediate nodes
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-7-8]{Route Errors (RERR)}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/aodv4.pdf}
+\end{center}
+\begin{itemize}
+\item If a node asked to forward but has not route, it replies with RERR
+\item Receiver of RERR then removes all routes including missing link
+\item Try to forward data packet again if new path selected
+\item If no path to target any more, send RERR to previous hop
+\end{itemize}
+\end{frame}
+\section{802.11s}
+\label{sec-8}
+\begin{frame}[label=sec-8-1]{802.11s}
+\begin{itemize}
+\item Many alternative mesh routing protocols have been proposed
+\item IEEE 802.11s could introduce a standard for everyone
+\item It is an IEEE 802 standard -> Link layer routing 
+\begin{itemize}
+\item also called path finding by some
+\end{itemize}
+\item 802.11s contains \emph{HWMP} as mandatory mesh protocol
+\begin{itemize}
+\item Hybrid Wireless Mesh Protocol (HWMP)
+\item A hybrid routing protocol, with a reactive component based on AODV and a tree-based proactive component
+\item Using four routing primitives: RREQ, RREP, RERR, RANN
+\item RANN: Route announcements of tree routes (not in AODV)
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-8-2]{802.11s Architecture Visualization}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/80211s.pdf}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-8-3]{802.11s Mesh APs}
+\begin{itemize}
+\item 802.11s provides meshing functionality for participating \emph{mesh points} 
+\begin{itemize}
+\item Link-layer frame forwarding
+\item Internet connectivity through \emph{mesh gateway}
+\end{itemize}
+\item In addition, 802.11s features \emph{mesh AP} functionality:
+\begin{itemize}
+\item Normal 802.11s mesh points can act as Access Point for nearby 802.11 (non-s) users
+\item Mesh APs will advertise "normal" ESSID and allow other nearby users to connect
+\item Traffic is the forwarded via the mesh towards mesh gateway
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-8-4]{802.11s Mesh AP extension}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/80211sB.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-8-5]{Hybrid Wireless Mesh Protocol (HWMP)}
+\begin{itemize}
+\item On-demand mode
+\begin{itemize}
+\item Used in intra-mesh routing for the route optimization
+\item When a root portal is not configured 
+\begin{itemize}
+\item Or it can provide a better path even if root is configured.
+\end{itemize}
+\end{itemize}
+\item Proactive, Tree based mode
+\begin{itemize}
+\item If a root portal is present, a distance vector routing tree is built
+\item Tree based routing avoids unnecessary discovery flooding during discovery and recovery
+\item Root MP periodically sends \emph{proactive route requests} PREQ to all
+\item Root MP announces itself (without path) with RANN broadcasts
+\end{itemize}
+\end{itemize}
+\end{frame}
+\section{Performance Networking}
+\label{sec-9}
+\begin{frame}[label=sec-9-1]{Review: Delay types}
+\begin{itemize}
+\item Propagation delay
+\begin{itemize}
+\item Speed of light -> Distance traveled
+\item Ideally, communication partner is close
+\end{itemize}
+\item Bandwidth/ transmission delay
+\begin{itemize}
+\item How many bits per second?
+\item Which link is bottleneck?
+\end{itemize}
+\item Competing traffic/ queuing delay
+\begin{itemize}
+\item How much delay spent in buffering queues?
+\item Up/Download?
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-9-2]{Congestion and Latency}
+\begin{itemize}
+\item Links become overloaded if more traffic is scheduled to be sent than possible -> Average troughput rate will go down
+\item Even for low bandwidth applications, latency will also become bad. Why?
+\end{itemize}
+\begin{block}<2->{}
+\begin{itemize}
+\item Incoming packets will queue up in buffers
+\item The waiting time in queue will increase latency
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.5\linewidth]{figs/bufferDelay.pdf}
+\end{center}
+\end{block}
+\end{frame}
+
+\begin{frame}[label=sec-9-3]{Recap: Congestion Probability}
+\begin{itemize}
+\item It is easy to compute congestion probability
+\begin{itemize}
+\item If uniform distribution of user load is assumed
+\end{itemize}
+\item Example: 100 Mb/s link, shared by 35 users
+\item Each user requires 10Mb/s when active
+\begin{itemize}
+\item \emph{On average}, users are only active 10\% of the time
+\end{itemize}
+\item What is the chance that the links is overloaded?
+\end{itemize}
+\begin{block}<2->{}
+\begin{itemize}
+\item Binomial distribution yields probability of overload
+\item For error threshold of 0.05\%, 35 users can share link
+\begin{itemize}
+\item Probability of exceeding bandwidth is < .0004
+\end{itemize}
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/35over35.pdf}
+\end{center}
+\end{block}
+\end{frame}
+\begin{frame}[label=sec-9-4]{Video Streaming Basics}
+\begin{itemize}
+\item Videos can have high bandwidth
+\begin{itemize}
+\item 720p 1.5-4Mbit/s
+\item 1080p 3-6Mbit/s
+\item 4k might be around 16Mbit/s
+\end{itemize}
+\item We don't need the data again after seeing it
+\begin{itemize}
+\item And complete video is huge (100 GB for 4K video)
+\end{itemize}
+\item Simple video streaming uses \emph{sliding window approach}
+\begin{itemize}
+\item Video data is transmitted while video is playing
+\item Sender estimates required consumption rate by client
+\end{itemize}
+\item More modern schemes allow client to fetch on demand
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-9-5]{Sliding Window in Video Streaming}
+\begin{center}
+\includegraphics[width=0.75\linewidth]{figs/buffering.pdf}
+
+\tiny Source: Based on Kurose \& Ross Fig 7.1
+\end{center}
+\begin{itemize}
+\item Server sends at steady rate (e.g. UDP)
+\begin{itemize}
+\item At least as big as \emph{consumption rate}
+\end{itemize}
+\item Network add random delays
+\item Pre-fetching and buffering still allow continuous playback
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-9-6]{Dynamic Adaptive Streaming over HTTP}
+\begin{itemize}
+\item DASH is commonly used nowadays
+\item Video file is split into chunks
+\item Each chunk is available in different resolutions
+\begin{itemize}
+\item \emph{Manifest file}  by server provides index
+\end{itemize}
+\item Client will choose appropriate resolution and fetch chunks
+\begin{itemize}
+\item TCP addresses reliable transport
+\item TCP also works better with firewalls than UDP
+\end{itemize}
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.5\linewidth]{figs/dash.png}
+
+\tiny Source: Youtube quality selector
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-9-7]{Content Delivery Networks (CDNs)}
+\begin{itemize}
+\item CDNs are service providers for high traffic websites
+\item Simple form: \emph{mirror} servers, replicating static content
+\begin{itemize}
+\item Similar to mirror servers, Software companies with large downloads
+\item Related to proxies we discussed, but proxies run by AS operator
+\end{itemize}
+\item More advanced: dynamic media such as audio and video
+\begin{itemize}
+\item Need more complicated replication of content
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-9-8]{CDN Strategies}
+\begin{itemize}
+\item Most CDNs follow one of two strategies
+\begin{itemize}
+\item \emph{Enter Deep}: Try to be as close to the customer as possible. Requires a large number of small clusters. Example: Akamai
+\item \emph{Bring Home}: Focus on few large clusters, connect them with high speed lines to important ISPs. Example: Limelight
+\end{itemize}
+\item Google follows both strategies
+\begin{itemize}
+\item Several hundred enter deep clusters with ISPs
+\item About 30 bring home clusters
+\item 8 mega data centers in North America and Europe
+\end{itemize}
+\item Nowadays, many big technology companies build their own CDN
+\begin{itemize}
+\item Amazon, Apple, Microsoft, L1 ISPs, \dots{}
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-9-9]{CDN Example: Akamai}
+\begin{itemize}
+\item Akamai was one of the pioneering CDNs (since before 2000)
+\begin{itemize}
+\item They pioneered \emph{enter deep}
+\end{itemize}
+\item According to Akamai
+\begin{itemize}
+\item 240,000 servers deployed in more than 130 countries at 1600 AS
+\item Akamai delivers around 10\% of all Web traffic
+\end{itemize}
+\item 85\% of the world's Internet users are within a single "network hop" of an Akamai server
+\end{itemize}
+
+\begin{center}
+\includegraphics[width=0.4\linewidth]{figs/cn-akamai.png}
+
+\tiny Source: w3techs.com
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-9-10]{Akamai Architecture Overview}
+\begin{center}
+\includegraphics[width=0.95\linewidth]{figs/akamaiPlatformArchitecture.jpg}
+
+\tiny Source: Netmanias (tech@netmanias.com)
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-9-11]{Multimedia networking: 3 application types}
+\begin{itemize}
+\item Streaming live audio, video
+\begin{itemize}
+\item Streaming: can begin playout before downloading entire file
+\item Content is not fully created at time of start
+\begin{itemize}
+\item e.g., live sporting event (football)
+\end{itemize}
+\end{itemize}
+\item Streaming, stored audio, video
+\begin{itemize}
+\item Stored (at server): can transmit faster than audio/video will be rendered (implies storing/buffering at client) e.g., YouTube, Netflix, Hulu
+\end{itemize}
+\item Conversational voice/video over IP
+\begin{itemize}
+\item Interactive nature of human-to-human conversation limits delay tolerance e.g., Skype
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-9-12]{VoIP characteristics}
+\begin{itemize}
+\item VoIP end-end-delay requirement: needed to maintain "conversational" aspect
+\begin{itemize}
+\item higher delays noticeable, impair interactivity
+\begin{itemize}
+\item $<$ 150 msec good
+\item $>$ 400 msec bad
+\end{itemize}
+\item includes application-level (packetization, playout), network delays
+\end{itemize}
+\item Speaker's audio: alternating talk spurts, silent periods.
+\begin{itemize}
+\item 64 kbps during talk spurt
+\item pkts generated only during talk spurts
+\item 20 msec chunks at 8 Kbytes/sec: 160 bytes of data
+\end{itemize}
+\item application-layer header added to each chunk
+\item chunk+header encapsulated into UDP or TCP segment
+\item application sends segment into socket every 20 msec during talkspurt
+\end{itemize}
+\end{frame}
+
+\section{QoS}
+\label{sec-10}
+\begin{frame}[label=sec-10-1]{Scheduling Mechanisms}
+\begin{itemize}
+\item How can we reserve 20\% of bandwidth for Skype
+\begin{itemize}
+\item If not used can we still use the remaining bandwidth?
+\end{itemize}
+\item Can be achieved by \emph{scheduling policies} at routers
+\begin{itemize}
+\item First-in-First-out: no classes
+\item Priority queues: serve VIP first
+\item Round-Robin: serve each class once each round
+\item Weighted Fair Queuing: RR with weight for each class
+\end{itemize}
+\item Default scheduling: packets are sent out in order of arrival
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-10-2]{First-in-First-out (FIFO)}
+\begin{itemize}
+\item No classes
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.75\linewidth]{figs/simpleQueuing.pdf}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-10-3]{Priority queues (PQ)}
+\begin{itemize}
+\item Multiple queues, serve VIP/higher queues first
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.75\linewidth]{figs/priorityQueuing.pdf}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-10-4]{Round-Robin (RR)}
+\begin{itemize}
+\item Router serves each class once each round
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.75\linewidth]{figs/rrQueuing.pdf}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-10-5]{Weighted Fair Queuing (WFQ)}
+\begin{itemize}
+\item Multiple queues, one for each class
+\item Round Robin with weight for each class
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.75\linewidth]{figs/wfqQueuing.pdf}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-10-6]{Summary Scheduling}
+\begin{itemize}
+\item Scheduling can be implemented using queues
+\item Allows to guarantee minimal transmission rate for classes
+\item Allows to distribute remaining bandwidth according to classes
+\item But scheduling cannot enforce limits on traffic in class
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-10-7]{Packet Policing}
+\begin{itemize}
+\item What if VIP packet grabs all bandwidth?
+\item QoS is intended to reserve certain share of connection
+\begin{itemize}
+\item Not provide all bandwidth to VIP
+\end{itemize}
+\item The routers also do \emph{policing} in addition to marking
+\item The router will keep track of traffic generated by sources
+\begin{itemize}
+\item E.g. reserve 50\% for Skype traffic
+\end{itemize}
+\item Effectively, QoS can \emph{isolate} traffic classes from each other
+\begin{itemize}
+\item Prevent classes from influencing other traffic
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-10-8]{Policing Mechanisms}
+\begin{itemize}
+\item How to prevent one source from taking over?
+\item Control rate by
+\begin{itemize}
+\item Long term average: sliding window
+\item Max burst size: very short window
+\end{itemize}
+\item Next slides have visualization for 
+\begin{itemize}
+\item 28 packet over 7 time slot sliding window
+\item 7 packet burst over 1 time slot window
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=sec-10-9]{Average and Burst}
+\begin{onlyenv}<1>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/averageBurstPeak0.pdf}
+
+Average and Burst policies
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/averageBurstPeak1.pdf}
+
+4 packets per slot fit in Average and Burst
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<3>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/averageBurstPeak2.pdf}
+
+8 packets per slot exceed Burst policy
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<4>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/averageBurstPeak3.pdf}
+
+29 packets exceed the Average Policy (28 over 7)
+\end{center}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}[label=sec-10-10]{Leaky Bucket}
+\begin{itemize}
+\item The \emph{leaky bucket} algorithm is used in NICs or routers
+\begin{itemize}
+\item Second variant: Token Bucket, discussed later
+\end{itemize}
+\end{itemize}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item Leaky Bucket is rate limited queue
+\begin{itemize}
+\item Incoming packets arriving with rate $r$
+\item Packets collected in the bucket of size $b$
+\item Packets leaving the bucket with fix rate $r'$
+\item If $r>r'$, bucket begins to fill
+\item If bucket full, drop next packet of class
+\item This effectively limits rate of traffic class
+\item $b$ limits burst rate
+\item $r'$ limits average rate
+\end{itemize}
+\item What is the problem with this approach?
+\end{itemize}
+\begin{block}<2->{}
+\begin{itemize}
+\item Packets are wasting time waiting in queue
+\end{itemize}
+\end{block}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/bucket.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[label=sec-10-11]{Example Leaky Bucket}
+\begin{onlyenv}<1>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/leakyBucketExample1.pdf}
+
+3 packets will be sent to output one round later
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/leakyBucketExample2.pdf}
+
+4 Packets will fill up the bucket with 1 Packet
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<3>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/leakyBucketExample3.pdf}
+
+4 Packets will fill up the bucket with 1 more Packet
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<4>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/leakyBucketExample4.pdf}
+
+5 Packets will lead to overflow in that case, 2 packets are dropped
+\end{center}
+\end{onlyenv}
+\end{frame}
+\begin{frame}[label=sec-10-12]{Token Bucket}
+\begin{columns}
+\begin{column}{0.6\textwidth}
+\begin{itemize}
+\item This variant allows non-uniform output rates and reduced delay
+\begin{itemize}
+\item Bucket of size $b$ is filled with tokens in rate $r'$
+\item Each packet arriving with rate $r$ attempts to remove token
+\item If no token is left, packet is discarded
+\item If $r<r'$, bucket begins to fill
+\item If bucket is full, larger bursts can be transmitted immediately
+\end{itemize}
+\item In Token Bucket, no additional delay is incurred on packets
+\end{itemize}
+\end{column}
+\begin{column}{0.4\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/token.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-10-13]{Example Token Bucket}
+\begin{onlyenv}<1>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/TokenBucketExample1.pdf}
+
+3 packets will be sent to output one round later
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<2>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/TokenBucketExample2.pdf}
+
+4 Packets will use up 4/5 tokens
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<3>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/TokenBucketExample3.pdf}
+
+4 Packets will use up all remaining tokens
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<4>
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/TokenBucketExample4.pdf}
+
+5 Packets need more than 3 tokens, 2 will be dropped
+\end{center}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}[label=sec-10-14]{Combining Scheduling and Policing}
+\begin{itemize}
+\item Use Weighted Fair Queues and Token Bucket metering
+\begin{itemize}
+\item Token bucket with own $r'$ in front of each queue
+\end{itemize}
+\item This yields an upper and lower bound on available bandwidth
+\begin{itemize}
+\item If too many packets arrive, they are dropped (bucket empty)
+\item If too few packets arrive, bucket fills up
+\end{itemize}
+\item The queues after Token Bucket are served by the WFQ algorithm
+\item -> Now we can provide our fair QoS regime!
+\begin{itemize}
+\item \emph{Relatively easy to implement in Linux using tc and iptables}
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Datacenter Networks}
+\label{sec-11}
+\begin{frame}[label=sec-11-1]{Traditional Datacenter Networks}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/datacenter.pdf}
+
+\tiny Based on Kurose \& Ross
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-11-2]{Highly Interconnected Datacenters}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/datacenter2.pdf}
+
+\tiny Based on Kurose \& Ross
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-11-3]{With virtual switches}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/datacenter3.pdf}
+\end{center}
+\end{frame}
+
+\section{Software Defined Networking}
+\label{sec-12}
+\begin{frame}[label=sec-12-1]{Overview SDN Architecture}
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/sdn-3layers.png}
+
+\tiny Source: opennetworking.org
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-12-2]{SDN Philosophy}
+\begin{itemize}
+\item SDN aims to provide \emph{abstractions} for network configurations
+\begin{itemize}
+\item Configuration independent of manufacturer
+\item Abstraction of complex global state
+\item Abstraction for communication and forwarding
+\end{itemize}
+\item Based on these abstractions, a \emph{Network Operating System} can optimize the network
+\begin{itemize}
+\item Parts of OpenStack can be considered such a NOS
+\end{itemize}
+\item The "software" part of name comes from modularization and abstraction, as in programming
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-12-3]{OpenFlow}
+\begin{itemize}
+\item The SDN vision needs protocols to exchange information
+\item OpenFlow is such a protocol (App-layer, on top of TCP/TLS)
+\item OpenFlow is developed by an industry-led organization, Open Networking Foundation
+\item First version 1.0 released in 2011, current version 1.4
+\item OpenFlow needs to be supported by switch and controller
+\begin{itemize}
+\item Commercial switches now widely support at least version 1.3
+\item Software controllers: POX (OF 1.0), OpenDayLight, Ryu (NOS)
+\end{itemize}
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.5\linewidth]{figs/sdnLayers.pdf}
+\end{center}
+\end{frame}
+
+\begin{frame}[label=sec-12-4]{Installing Flows on Switches}
+\begin{itemize}
+\item To speed up processing, \emph{flow} rules can be pushed from controller to switch
+\item They are stored in flow tables, consisting of rule, action, and statistics
+\item Actions can be
+\begin{itemize}
+\item Forward to 0+ ports
+\item Send payload to controller
+\item Process normally
+\item \emph{Modiy fields}
+\item Other user-defined extensions
+\end{itemize}
+\end{itemize}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/flowtable.pdf}
+\end{center}
+\end{frame}
+\begin{frame}[label=sec-12-5]{Application ideas with SDN}
+\begin{itemize}
+\item Replacing L2 and L3 protocols for routing in network
+\begin{itemize}
+\item End hosts speak their own IPvNils, with string identifiers
+\item SDN controller has overview of client locations, creates rules
+\end{itemize}
+\item Reconfiguration of network should be much easier 
+\begin{itemize}
+\item In case of link loss, device loss
+\item No need for STP and similar
+\end{itemize}
+\item Network monitoring becomes easier 
+\begin{itemize}
+\item Setting up mirroring ports is trivial
+\item Per-flow counters allow to estimate traffic details
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-12-6]{Vision of Network Operating System}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/datacenter4.pdf}
+\end{center}
+\end{frame}
+
+\section{The Cloud}
+\label{sec-13}
+\begin{frame}[label=sec-13-1]{NIST Definition}
+\begin{quotation} %% 
+Cloud computing is a model for enabling ubiquitous, convenient, on-demand network access to a shared pool of configurable computing resources (e.g., networks, servers, storage, applications, and services) that
+can be rapidly provisioned and released with minimal management effort or service provider interaction. --\{\tiny NIST Special Publication 800-145 \normalsize\}
+\end{quotation}
+\end{frame}
+
+\begin{frame}[label=sec-13-2]{Flavors of clouds}
+\begin{itemize}
+\item Essential characteristics:
+\begin{itemize}
+\item On demand \& self-service
+\item Ubiquitous availability and access
+\item Resource pooling by provider
+\item \emph{Rapid elasticity} (scaling on demand)
+\item Pay as you go/measured service
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-13-3]{Service Models}
+\begin{itemize}
+\item The general term cloud covers different \emph{service models}
+\begin{itemize}
+\item Software-as-a-Service (SaaS)
+\item Platform-as-a-Service (PaaS)
+\item Infrastructure-as-a-Service (IaaS)
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-13-4]{Software-as-a-Service (SaaS)}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item The consumer uses the provider’s applications running on a cloud infrastructure
+\item Shifting host-based applications to the web
+\begin{itemize}
+\item Google mail/apps
+\item MS Office 365
+\item Facebook
+\item Wordpress
+\end{itemize}
+\item Somewhat similar to traditional websites
+\begin{itemize}
+\item But now we have scaling, pay-per-use, resource pooling
+\item Richer applications compared to static website
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/saas.pdf}
+
+\tiny SaaS products, copyright respective holders
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-13-5]{How to use SaaS}
+\begin{itemize}
+\item SaaS is mostly used by end users
+\item Allows access from many machines, OSs
+\item Allows access from internet cafes, airports, etc.
+\item No local installation is required
+\item Reduces client management for IT services
+\item Pay-as-you-use vs one-time license
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-13-6]{Platform-as-a-Service (PaaS)}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item Provides a platform for you to run your applications
+\begin{itemize}
+\item Google App Engine \url{https://cloud-playground.appspot.com/playground/}
+\item Amazon elastic beanstalk
+\item Windows Azure
+\end{itemize}
+\item You write your python code (e.g. wsgi to handle HTTP)
+\begin{itemize}
+\item PaaS deploys this to one or more servers automatically
+\item Little configuration required, no management of servers
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/paas.pdf}
+
+\tiny PaaS products, copyright respective holders
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-13-7]{How to use Paas}
+\begin{itemize}
+\item Mostly used by application developers
+\item You want to test or deploy some code?
+\begin{itemize}
+\item Just send it to the PaaS provider
+\end{itemize}
+\item No setup and configuration of VMs or similar
+\item PaaS will provide suitable runtime environment
+\item PaaS will also allow to scale up (or down) if required
+\item PaaS can also provide standard services such as SQL servers
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-13-8]{Infrastructure-as-a-Service (IaaS)}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item Provides Infrastructure on demand
+\begin{itemize}
+\item Virtual machines on demand 
+\begin{itemize}
+\item Amazon EC2
+\item Google compute
+\item Windows Azure
+\end{itemize}
+\item Infrastructure can also mean
+\begin{itemize}
+\item Harddrives/Storage
+\item Load balancers
+\item Network links
+\end{itemize}
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=0.7\linewidth]{figs/iaas.pdf}
+
+\tiny IaaS products, copyright respective holders
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-13-9]{How to use IaaS}
+\begin{itemize}
+\item IaaS is designed for system/network architects
+\item Provide specific configurations for problems
+\begin{itemize}
+\item E.g. whole customized VM images
+\item Even sets of multiple VM images with different servers
+\item Deploy all these together easily to scale up your operations
+\item Connect virtual block devices to a RAID5, use with instances
+\end{itemize}
+\item IaaS gives you full control over the (virtual) machine
+\begin{itemize}
+\item Small \emph{instances} in EC2 come with surprisingly little hardware
+\begin{itemize}
+\item t2.micro: 1GB memory, 1 CPU
+\end{itemize}
+\item Big instances come with powerful hardware
+\begin{itemize}
+\item d2.8xlarge: 36 cores, 244GB memory, 48TB storage
+\end{itemize}
+\end{itemize}
+\item You can use an EC2 instance to run your own mail server, file
+server, VPN tunnel, database, numbercruncher
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-13-10]{Deployment Models}
+\begin{itemize}
+\item Public clouds
+\begin{itemize}
+\item The cloud infrastructure is provisioned for open use by the general public
+\item It exists on the premises of the cloud provider
+\item Most commonly used setup for private users and small companies
+\item Communication to the cloud over the internet
+\end{itemize}
+\item Private clouds
+\begin{itemize}
+\item Private cloud may be owned managed, and operated by the organization, a third party, or some combination
+\item The hardware running the cloud is located with the users, or exclusively used by that party
+\end{itemize}
+\item Hybrid clouds
+\begin{itemize}
+\item Mix between private and public clouds
+\item Eg. Security sensitive data handled in private cloud, other services in public cloud
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}[label=sec-13-11]{Cloud Pros and Cons}
+\begin{itemize}
+\item Pros
+\begin{itemize}
+\item Choice and Agility - Scale when you need it
+\item Scale and Cost - No need for own datacenter
+\item Choose the abstraction layer that you need (SaaS/PaaS/IaaS)
+\item Outsource problems you don't like (e.g. backup)
+\end{itemize}
+\item Cons
+\begin{itemize}
+\item All your data is now with a (US) company
+\item Lock-in once you adapt to one provider
+\item Lack of fine grained control below chosen abstraction layer
+\item If your application does not need elasticity, buying your own hardware might be cheaper\dots{}
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\section{Enterprise Networks}
+\label{sec-14}
+\begin{frame}[label=sec-14-1]{Services provided by the Network}
+\begin{itemize}
+\item Which services are fundamentally required to operate a network like SUTD's?
+\begin{itemize}
+\item Not restricted to basic network functionality\dots{}
+\end{itemize}
+\end{itemize}
+\begin{block}<2->{}
+\begin{itemize}
+\item APs, Switches, DHCP, internal routing, internal DNS
+\item NAT, proxies, border routing, DNS
+\item Firewalls, DMZ, IDS, IPS
+\item User DB and authentication
+\item NAS, Backup?
+\end{itemize}
+\end{block}
+\end{frame}
+\begin{frame}[label=sec-14-2]{Fundamental connectivity L2}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item Access Points
+\begin{itemize}
+\item Operate the wireless networks
+\item Translate between 802.11 and 802.3
+\item Technically L2 only
+\end{itemize}
+\item Switches
+\begin{itemize}
+\item Connecting the hosts with network
+\item Span the L2 broadcast domain
+\item Technically L2 only (ignoring VLAN for now)
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/l2Devices.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-14-3]{Fundamental connectivity L3}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item DHCP
+\begin{itemize}
+\item Provide automatic L3 configuration in L2 broadcast domain
+\item Routers can also forward L2 DHCP requests to remote server
+\end{itemize}
+\item Internal routers
+\begin{itemize}
+\item Connect different internal L3 subnetworks
+\item Use Link State routing to discover routes and avoid loops
+\item Act as \emph{gateway} for hosts to talk to devices outside local subnet
+\end{itemize}
+\item Internal DNS
+\begin{itemize}
+\item Provide domain name resolution for internal IP addresses (e.g. ithelpdesk.sutd.edu.sg)
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/l3Devices.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-14-4]{Connecting to the Internet}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item Network Address Translation (NAT)
+\begin{itemize}
+\item Translates requests from private IP addresses to its public IP
+\item Each connection is kept in local table
+\begin{itemize}
+\item Local source IP, Target IP, source Port, target Port, translated port
+\end{itemize}
+\item This allows Internet access to private IPs, connection has to be established by them
+\item To allow remote access to private IPs, NAT needs to be configured to forward incoming requests to certain ports
+\end{itemize}
+\item (Web) Proxies
+\begin{itemize}
+\item Accelerating frequent HTTP requests
+\item Allow basic filtering and monitoring
+\item Also allow private IPs to access Internet
+\end{itemize}
+\item AS border routing
+\begin{itemize}
+\item Talking to border routers of other ASs
+\item Example protocol: BGP
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/externalDevices.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-14-5]{Security Devices I}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item Firewalls
+\begin{itemize}
+\item Traffic is routed \emph{through} firewall
+\item Allow only selected hosts (L3), protocols (L4), or applications (L5) to pass
+\item Can be a visible hop (L3), or operate invisibly on L2 (harder to manage)
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/securityDevices.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-14-6]{Security Devices II}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item De-Militarized Zones (DMZ)
+\begin{itemize}
+\item Usually a subnetwork of hosts with public IPs, providing services to the internet
+\item Secured by specific firewall configurations to allow only these services
+\end{itemize}
+\item Network \emph{taps} (e.g., mirror ports on switches) allow all traffic to be observed
+\item Intruction Detection Systems (IDS)
+\begin{itemize}
+\item Passive network traffic monitoring stations
+\item Apply rulesets to detect unwanted, unexpected, or malicious traffic
+\end{itemize}
+\item Intrusion Prevention Systems (IPS)
+\begin{itemize}
+\item Active IDSs, will prevent unwanted traffic from being delivered
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/securityDevices2.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-14-7]{Other services}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item User database (e.g. via LDAP)
+\item User Authentication Service (e.g. Kerberos)
+\item Time servers (e.g. NTP)
+\item Mail servers (SMTP/IMAP)
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/otherDevices2.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+\begin{frame}[label=sec-14-8]{Other services II}
+\begin{columns}
+\begin{column}{0.7\textwidth}
+\begin{itemize}
+\item Virtualization Hosts
+\begin{itemize}
+\item Run large number of virtual machines
+\item Each VM guest has own virtual network
+\begin{itemize}
+\item Host acts as router, NAT, switch for guests
+\end{itemize}
+\end{itemize}
+\item Network Area Storage (NAS)
+\begin{itemize}
+\item Storage devices attached to network
+\item Run their own OS, manage their disks
+\item Talk range of protocols (FTP, SMB, HTTP, SCP, NFS)
+\item E.g. Windows shared drives (SMB protocol)
+\end{itemize}
+\item Storage Attached Networks (SAN)
+\begin{itemize}
+\item Used for high performance clusters
+\item Connected through fibre channels
+\item Disks are managed by the user OS directly
+\end{itemize}
+\end{itemize}
+\end{column}
+\begin{column}{0.3\textwidth}
+\begin{center}
+\includegraphics[width=\linewidth]{figs/otherDevices.pdf}
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-14-9]{NAS and SAN}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/natsan.pdf}
+\end{center}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+The Wires
+\begin{itemize}
+\item NAS uses TCP/IP Networks
+\item SAN uses Fibre Channel
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+The Protocols
+\begin{itemize}
+\item NAS uses TCP/IP and NFS/CIFS/HTTP
+\item SAN uses Encapsulated SCSI
+\end{itemize}
+\end{column}
+\end{columns}
+\end{frame}
+\begin{frame}[label=sec-14-10]{Network Management}
+\begin{quotation} %% 
+Network management includes the deployment, integration
+and coordination of the hardware, software, and human
+elements to monitor, test, poll, configure, analyze, evaluate,
+and control the network and element resources to meet the
+real-time, operational performance, and Quality of Service
+requirements at a reasonable cost.
+\end{quotation}
+\begin{block}{}
+Commonly known as FCAPS, there are five
+categories under Network Management:
+\begin{itemize}
+\item \alert{F} -- Fault management
+\item \alert{C} -- Configuration management
+\item \alert{A} -- Accounting management
+\item \alert{P} -- Performance management
+\item \alert{S} -- Security management
+\end{itemize}
+\end{block}
+\end{frame}
+
+\begin{frame}[label=sec-14-11]{Infrastructure for network management}
+\begin{center}
+\includegraphics[width=0.6\linewidth]{figs/management.pdf}
+\end{center}
+\emph{managed devices} contain \emph{managed objects} whose data is gathered into a
+\emph{Management Information Base} (MIB)
+\end{frame}
+
+\begin{frame}[label=sec-14-12]{SNMP overview: four key parts}
+\begin{itemize}
+\item Management information base (MIB)
+\begin{itemize}
+\item distributed information store of network management data
+\end{itemize}
+\item Structure of Management Information (SMI)
+\begin{itemize}
+\item data definition language for MIB objects
+\end{itemize}
+\item SNMP protocol
+\begin{itemize}
+\item convey manager <-> managed object info, commands
+\end{itemize}
+\item security, administration capabilities
+\begin{itemize}
+\item major addition in SNMPv3
+\end{itemize}
+\end{itemize}
+\end{frame}
+\begin{frame}[label=sec-14-13]{Operation modes}
+\begin{itemize}
+\item Two ways to convey MIB info and commands
+\end{itemize}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/management1.pdf}
+
+request/response mode
+\end{center}
+\end{column}
+
+\begin{column}{0.5\textwidth}
+\begin{center}
+\includegraphics[width=0.8\linewidth]{figs/management2.pdf}
+
+trap mode
+\end{center}
+\end{column}
+\end{columns}
+\end{frame}
+
+
+\section{The Onion Router}
+\label{sec-15}
+\begin{frame}[label=sec-15-1]{Overview}
+\begin{onlyenv}<1>
+\begin{center}
+\includegraphics[width=0.75\linewidth]{figs/tor0.pdf}
+
+The users looks up list of onion routers from directory
+\end{center}
+\end{onlyenv}
+
+\begin{onlyenv}<2>
+\begin{center}
+\includegraphics[width=0.75\linewidth]{figs/tor1.pdf}
+
+User selects a random path through 3+ onion routers
+\end{center}
+\end{onlyenv}
+\begin{onlyenv}<3>
+\begin{center}
+\includegraphics[width=0.75\linewidth]{figs/tor2.pdf}
+
+TOR circuits are establed between onion routers on the path
+\end{center}
+\end{onlyenv}
+
+\begin{onlyenv}<4>
+\begin{center}
+\includegraphics[width=0.75\linewidth]{figs/tor3.pdf}
+
+The traffic leaves the onion network through exit node
+\end{center}
+\end{onlyenv}
+\end{frame}
+
+\begin{frame}[label=sec-15-2]{TOR circuits}
+\begin{itemize}
+\item TOR circuits are connections between user, onion routers, and exit nodes
+\item Circuit connections are encrypted and authenticated (no-one else can read or modify data exchanged)
+\item The involved onion routers cannot see payload (only exit node can)
+\item Onion routers also don't see source (only first onion router on circuit)
+\end{itemize}
+$\Rightarrow$ Privacy violated only if all onion routers are malicious
+\end{frame}
+
+\begin{frame}[label=sec-15-3]{Discussion TOR}
+\begin{itemize}
+\item TOR is mostly run by private people (no fees)
+\item Running an exit node can be (very) dangerous - you might be responsible for traffic sent
+\item Running an exit node can also yield a lot of information on TOR use
+\begin{itemize}
+\item Exit nodes (supposedly) often run by secret service, researchers
+\end{itemize}
+\item Why not use TOR all the time?
+\begin{itemize}
+\item It is slooow (bandwidth)
+\item It has long propagation delay (random routing around globe)
+\end{itemize}
+\end{itemize}
+\end{frame}
+% Emacs 24.5.1 (Org mode 8.2.7b)
+\end{document}
