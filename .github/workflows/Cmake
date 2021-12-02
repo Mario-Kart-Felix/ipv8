@@ -1,0 +1,190 @@
+
+
+On This Page
+Cake 2.0.0 to Cake 2.1.0
+
+Cake 1.38.x to Cake 2.0.0
+
+Getting Started
+Setting Up A New Project
+Setting Up A New Frosting Project
+Frequently Asked Questions
+Support lifecycle
+Upgrade instructions
+Fundamentals
+Running Builds
+Writing Builds
+Integrations
+Extending Cake
+Team
+Upgrade instructions
+To update Cake follow these instructions
+
+Cake .NET Tool
+Cake Frosting
+Cake runner for .NET Framework
+Cake runner for .NET Core
+When using the .NET tool as a local tool:
+
+Copy to clipboard
+dotnet tool install --local Cake.Tool
+When using the .NET tool as a global tool:
+
+Copy to clipboard
+dotnet tool install --global Cake.Tool
+Cake 2.0.0 to Cake 2.1.0
+Cake.DotNetTool.Module
+Starting with this release, Cake.DotNetTool.Module will always be released together with Cake and will only be compatible with the current release.
+
+If you use Cake.DotNetTool.Module already on your builds remove the Cake.DotNetTool.Module from your build script as it's no longer needed.
+
+Cake 1.38.x to Cake 2.0.0
+Cake 2.0 is a major version containing breaking changes.
+
+Replace obsolete members
+Members marked as obsolete in previous versions have been removed in Cake 2.0. Update to the member suggested in the obsolete message.
+
+Cake Frosting
+Removal of CakeHostBuilder
+CakeHostBuilder has been removed. With Cake Frosting 2.0 CakeHost can be used directly to create the CakeHost object.
+
+With Cake Frosting 1.38.x:
+
+Copy to clipboard
+// Create the host.
+var host =
+    new CakeHostBuilder()
+       .WithArguments(args)
+       .UseStartup<Program>()
+       .Build();
+
+// Run the host.
+return host.Run();
+With Cake Frosting 2.0:
+
+Copy to clipboard
+// Create and run the host.
+return
+    new CakeHost()
+        .UseContext<BuildContext>()
+        .Run(args);
+Removal of ICakeServices
+ICakeServices has been removed. With Cake Frosting 2.0 you no longer need to implement the IFrostingStartup interface in the Program class. Configuration can be done directly on the CakeHost object instead.
+
+With Cake Frosting 1.38.x:
+
+Copy to clipboard
+public class Program : IFrostingStartup
+{
+    public static int Main(string[] args)
+    {
+        // Create the host.
+        var host =
+            new CakeHostBuilder()
+                .WithArguments(args)
+                .UseStartup<Program>()
+                .Build();
+
+        // Run the host.
+        return host.Run();
+    }
+
+    public void Configure(ICakeServices services)
+    {
+        services.UseContext<BuildContext>();
+        services.UseLifetime<Lifetime>();
+        services.UseWorkingDirectory("..");
+    }
+}
+With Cake Frosting 2.0:
+
+Copy to clipboard
+public class Program : IFrostingStartup
+{
+    public static int Main(string[] args)
+    {
+        // Create and run the host.
+        return
+            new CakeHost()
+                .UseContext<BuildContext>()
+                .UseLifetime<Lifetime>()
+                .UseWorkingDirectory("..")
+                .Run(args);
+    }
+}
+Tool installation improvements
+It is no longer required to manually register the nuget module with Cake Frosting. The method to install tools in Cake Frosting has also been renamed from UseTool to InstallTool:
+
+With Cake Frosting 1.38.x:
+
+Copy to clipboard
+public class Program : IFrostingStartup
+{
+    public static int Main(string[] args)
+    {
+        // Create the host.
+        var host =
+            new CakeHostBuilder()
+                .WithArguments(args)
+                .UseStartup<Program>()
+                .Build();
+
+        // Run the host.
+        return host.Run();
+    }
+
+    public void Configure(ICakeServices services)
+    {
+        // Register the NuGet module.
+        var module = new NuGetModule(new CakeConfiguration(new Dictionary<string, string>()));
+        module.Register(services);
+
+        // Register tools.
+        services.UseTool(new Uri("nuget:?package=NUnit.ConsoleRunner&version=3.11.1"));
+    }
+}
+With Cake Frosting 1.0:
+
+Copy to clipboard
+public class Program : IFrostingStartup
+{
+    public static int Main(string[] args)
+    {
+        // Create and run the host.
+        return
+            new CakeHost()
+                .InstallTool(new Uri("nuget:?package=NUnit.ConsoleRunner&version=2.11.1"));
+                .Run(args);
+    }
+}
+Cake CLI updates
+As part of the rewrite of the CLI of Cake for Cake 2.0 parsing of switches is now stricter.
+
+Argument syntax
+With Cake 2.0 arguments should always be called with multi-dash syntax (e.g. --target=Foo). When using single-dash syntax (e.g. -target=Foo) an error message similar to the following will be shown:
+
+Copy to clipboard
+Error: Unknown command 'Foo'.
+       build.cake -target=Foo
+                          ^^^^^^ No such command
+Passing empty arguments
+With previous versions of Cake it was possible to define an empty argument (e.g. --foo=) or pass an empty value (e.g. --foo="").
+
+With Cake 2.0 an error message similar to the following will be shown:
+
+Copy to clipboard
+Error: Expected an option value.
+One key difference with Cake 2.0 is that beyond key/value arguments (--key=value), it supports flags (--flag), and multiple arguments with the same name (--key=value1 --key=value2), which allows for much more flexibility than before.
+
+In Cake 2.0 use a space instead of = if the value can be empty or null:
+
+Copy to clipboard
+--foo ""
+If you use this syntax for passing variables from a CI system you can use a space as separator between argument and value:
+
+Copy to clipboard
+--foo %myvariable%
+Azure DevOps Build Task Extension
+Make sure to use at least version 3.1 of Azure DevOps Build Task Extension and version 3.* of the task with Cake 2.0.
+
+ 
