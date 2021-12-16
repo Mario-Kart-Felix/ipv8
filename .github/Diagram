@@ -1,0 +1,398 @@
+  3.1) IPv10: IPv6 Host to IPv4 Host.
+         ------------------------------
+
+
+- IPv10 Packet:
+
+
+         |          128-bit        |                    128-bit                  |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | Data|   Source IPv6 Address   | 0000..0  ASN  MAC  Destination IPv4 Address |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+- Sending IPv10 host TCP/IP Configuration:
+
+
+      IP Address:               IPv6 Address
+      Prefix Length:            /length
+      Default Gateway:          IPv6 Address (Optional)
+      DNS Addresses:            IPv6/IPv4 Address
+
+
+
+
+- Example of IPv10 Operation:
+  ---------------------------
+
+                R1 & R2 have both IPv4/IPv6 routing enabled
+IPv10 Host                                                     IPv10 Host
+
+   PC-1             R1             *            R2                PC-2
+  +----+                         *   *                           +----+
+  |    |             *         *       *         *               |    |
+  |    |o---------o* X *o---o* IPv4/IPv6 *o---o* X *o-----------o|    |
+  +----+  2001:1::1  *     *               *     *  192.168.1.1  +----+
+ /    /                      *  Network  *                      /    /
++----+                         *       *                       +----+
+                                 *   *
+IPv6: 2001:1::10/64                *                IPv4: 192.168.1.10/24
+DG  : 2001:1::1                                     DG  : 192.168.1.1
+
+      |      128-bit    |            128-bit          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Data |    2001:1::10   | 000..0 ASN MAC 192.168.1.10 |--->
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       Src. IPv6 Address      Dest. IPv4 Address
+
+
+
+                     IPv10: IPv6 host to IPv4 host
+
+
+
+
+
+
+Khaled Omar             Internet-Draft                   [Page 5]
+
+RFC                   IPv10 Specification            September 2, 2017
+
+
+
+
+
+     3.2) IPv10: IPv4 Host to IPv6 Host.
+          ------------------------------
+
+
+- IPv10 Packet:
+
+
+         |              128-bit                |           128-bit           |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | Data| 000..0 ASN MAC  Source IPv4 Address |  Destination IPv6 Address   |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+- Sending IPv10 host TCP/IP Configuration:
+
+
+      IP Address:               IPv4 Address
+      Subnet Mask:              /mask
+      Default Gateway:          IPv4 Address
+      DNS Addresses:            IPv4/IPv6 Address
+
+
+
+
+- Example of IPv10 Operation:
+  ---------------------------
+
+              R1 & R2 have both IPv4/IPv6 routing enabled
+IPv10 Host                                                    IPv10 Host
+
+   PC-1             R1             *            R2                PC-2
+  +----+                         *   *                           +----+
+  |    |             *         *       *         *               |    |
+  |    |o---------o* X *o---o* IPv4/IPv6 *o---o* X *o-----------o|    |
+  +----+  2001:1::1  *     *               *     *  192.168.1.1  +----+
+ /    /                      *  Network  *                      /    /
++----+                         *       *                       +----+
+                                 *   *
+IPv6: 2001:1::10/64                *               IPv4: 192.168.1.10/24
+DG  : 2001:1::1                                    DG  : 192.168.1.1
+
+
+                                   |       128-bit     |           128-bit           |
+                                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                               <---|     2001:1::10    | 000..0 ASN MAC 192.168.1.10 | Data|
+                                   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+                                    Dest. IPv6 Address        Src. IPv4 Address
+
+
+
+                    IPv10: IPv4 host to IPv6 host
+
+
+
+
+
+Khaled Omar             Internet-Draft                   [Page 6]
+
+RFC                   IPv10 Specification            September 2, 2017
+
+
+
+
+     3.3) IPv10: IPv6 Host to IPv6 Host.
+          ------------------------------
+
+
+- IPv10 Packet:
+
+
+         |        128-bit        |          128-bit            |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | Data|  Source IPv6 Address  |  Destination IPv6 Address   |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+- Sending IPv10 host TCP/IP Configuration:
+
+
+      IP Address:               IPv6 Address
+      Prefix Length:            /Length
+      Default Gateway:          IPv6 Address (Optional)
+      DNS Addresses:            IPv6/IPv4 Address
+
+
+
+
+- Example of IPv10 Operation:
+  ---------------------------
+
+              R1 & R2 have both IPv4/IPv6 routing enabled
+IPv10 Host                                                   IPv10 Host
+
+   PC-1             R1             *            R2              PC-2
+  +----+                         *   *                         +----+
+  |    |             *         *       *         *             |    |
+  |    |o---------o* X *o---o* IPv4/IPv6 *o---o* X *o---------o|    |
+  +----+  2001:1::1  *     *               *     *  3001:1::1  +----+
+ /    /                      *  Network  *                    /    /
++----+                         *       *                     +----+
+                                 *   *
+IPv6: 2001:1::10/64                *              IPv6: 3001:1::10/64
+DG  : 2001:1::1                                   DG  : 3001:1::1
+
+
+      |     128-bit     |      128-bit      |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Data |   2001:1::10    |     3001:1::10    |--->
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+       Src. IPv6 Address  Dest. IPv6 Address
+
+
+                         IPv10: IPv6 host to IPv6 host
+
+
+
+
+
+
+Khaled Omar             Internet-Draft                   [Page 7]
+
+RFC                   IPv10 Specification            September 2, 2017
+
+
+
+
+
+     3.4) IPv10: IPv4 Host to IPv4 Host.
+          ------------------------------
+
+
+- IPv10 Packet:
+
+
+         |               128-bit               |                 128-bit                 |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   | Data| 000..0 ASN MAC Source IPv4 Address  | 000..0 ASN MAC Destination IPv4 Address |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+- Sending IPv10 host TCP/IP Configuration:
+
+
+      IP Address:               IPv6 Address
+      Subnet Mask:              /Mask
+      Default Gateway:          IPv4 Address
+      DNS Addresses:            IPv6/IPv4 Address
+
+
+
+
+- Example of IPv10 Operation:
+  ---------------------------
+
+              R1 & R2 have both IPv4/IPv6 routing enabled
+ IPv10 Host                                                   IPv10 Host
+
+    PC-1            R1             *            R2                PC-2
+   +----+                        *   *                           +----+
+   |    |            *         *       *         *               |    |
+   |    |o--------o* X *o---o* IPv4/IPv8 *o---o* X *o-----------o|    |
+   +----+  10.1.1.1  *     *               *     *  192.168.1.1  +----+
+  /    /                     *  Network  *                      /    /
+ +----+                        *       *                       +----+
+                                 *   *
+IPv4: 10.1.1.10/24                 *              IPv6: 192.168.1.10/24
+DG  : 10.1.1.1                                    DG  : 192.168.1.1
+
+
+      |          128-bit          |            128-bit          |
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+|Data | 000..0 ASN MAC 10.1.1.10  | 000..0 ASN MAC 192.168.1.10 |--->
++-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+           Src. IPv4 Address             Dest. IPv4 Address
+
+
+                     IPv10: IPv4 host to IPv4 host
+
+
+Important Notes: - IPv4 and IPv6 routing must be enabled on all routers, so
+                   when a router receives an IPv10 packet, it should use
+                   the appropriate routing table based on the destination
+                   address within the IPv10 packet.
+
+                 - That means, if the received IPv10 packet contains an IPv4
+                   address in the destination address field, the router
+                   should use the IPv4 routing table to make a routing
+                   decision, and if the received IPv10 packet contains an IPv6
+                   address in the destination address field, the router should
+                   use the IPv6 routing table to make a routing decision.
+
+                 - All Internet connected hosts must be IPv10 hosts to be
+                   able to communicate regardless the used IP version,
+                   and the IPv10 deployment process can be accomplished
+                   by ALL technology companies developing OSs for hosts
+                   networking and security devices.
+
+
+
+
+Khaled Omar             Internet-Draft                   [Page 8]
+
+RFC                   IPv10 Specification            September 2, 2017
+
+
+
+4.  IPv10 Packet Header Format.
+
+
+
+
+- The following figure shows the IPv10 packet header which is almost
+  the same as the IPv6 packet header:
+
+
+
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |Version| Traffic Class |           Flow Label                  |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |         Payload Length        |  Next Header  |   Hop Limit   |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                         Source Address                        +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +                      Destination Address                      +
+   |                                                               |
+   +                                                               +
+   |                                                               |
+   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+
+
+
+
+   Version              4-bit Internet Protocol version number.
+
+                        - 0100 : IPv4 Packet
+                                 (Src. and dest. are IPv4).
+                        - 0110 : IPv6 Packet
+                                 (Src. and dest. are IPv6).
+                        - 1010 : IPv8  Packet. Mask
+                        - 1110 : IPv10 Packet
+                                 (Src. and dest. are IPv4/IPv6).
+
+
+   Traffic Class        8-bit traffic class field.
+
+   Flow Label           20-bit flow label.
+
+   Payload Length       16-bit unsigned integer.  Length of the payload,
+                        i.e., the rest of the packet following
+                        this IP header, in octets.  (Note that any
+                        extension headers [section 4] present are
+                        considered part of the payload, i.e., included
+                        in the length count.)
+
+   Next Header          8-bit selector.  Identifies the type of header
+                        immediately following the IP header.
+
+   Hop Limit            8-bit unsigned integer.  Decremented by 1 by
+                        each node that forwards the packet. The packet
+                        is discarded if Hop Limit is decremented to
+                        zero.
+
+   Source Address       128-bit address of the originator of the packet.
+
+
+
+                                    |     32-bit    |  16-bit |  48-bit |    32-bit     |
+    +-+-+-+-+-+-+-+-+-+-+-+         +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |   IPv6 Address      |   OR    | 00000......0  |   ASN   |   MAC   | IPv4 Address  |
+    +-+-+-+-+-+-+-+-+-+-+-+         +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |      128-bit        |         |                      128-bit                      |
+
+
+
+   Destination Address  128-bit address of the intended recipient of the
+                        packet (possibly not the ultimate recipient, if
+                        a Routing header is present).
+
+
+
+                                    |     32-bit    |  16-bit |  48-bit |    32-bit     |
+    +-+-+-+-+-+-+-+-+-+-+-+         +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |   IPv6 Address      |   OR    | 00000......0  |   ASN   |   MAC   | IPv4 Address  |
+    +-+-+-+-+-+-+-+-+-+-+-+         +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    |      128-bit        |         |                      128-bit                      |
+
+
+
+5. Advantages of IPv10.
+
+
+    1) Introduces an efficient way of communication between IPv6 hosts
+       and IPv4 hosts.
+
+    2) Allows IPv4 only hosts to exist and communicate with IPv6 only
+       hosts even after the depletion of the IPv4 address space.
+
+    3) Adds flexibility when making a query sent to the DNS for
+       hostname resolution as IPv4 and IPv6 hosts can communicate with
+       IPv4 or IPv6 DNS servers and the DNS can reply with any record
+       it has (either an IPv6 record Host AAAA record or an IPv4
+       record Host A record).
+
+    4) There is no need to think about migration as both IPv4 and IPv6
+       hosts can coexist and communicate to each other which will
+       allow the usage of the address space of both IPv4 and IPv6
+       making the available number of connected hosts be bigger.
+
+    5) IPv10 support on "all" Internet connected hosts can be deployed
+       in a very short time by technology companies developing OSs
+       (for hosts and networking devices, and there will be no
+       dependence on enterprise users and it is just a software
+       development process in the NIC cards of all hosts to allow
+       encapsulating both IPv4 and IPv6 in the same IP packet header.
+
+    6) Offers the four types of communication between hosts:
+         - IPv6 hosts to IPv4 hosts (10 to 8).
+
+          - IPv6 hosts to IPv4 hosts (6 to 4).
+
+          - IPv4 hosts to IPv6 hosts (4 to 6).
+
+          - IPv6 hosts to IPv6 hosts (6 to 6).
+
+          - IPv4 hosts to IPv4 hosts (4 to 4).
