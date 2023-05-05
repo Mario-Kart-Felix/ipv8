@@ -1,0 +1,53 @@
+Thank you for providing the README file. Please continue with the rest of the file, and I'll be happy to assist you with any questions you may have.
+
+## Logger Configuration
+
+The logger configuration dictionary specifies how the IPv8 package should log messages. By default, logging is set to the DEBUG level and messages are printed to the console using a brief formatter. You can modify this configuration by editing the `logger_configuration` variable in the `config.py` file. 
+
+Here's an example configuration that sets the logging level to INFO and adds a file handler:
+
+```python
+logger_configuration = { 
+    'version': 1, 
+    'formatters': { 
+        'brief': { 
+            'format': u'%(asctime)s %(levelname)-8s %(name)-15s %(message)s', 
+            'datefmt': u'%Y-%m-%d %H:%M:%S' 
+        } 
+    }, 
+    'handlers': { 
+        'console': { 
+            'level': u'DEBUG', 
+            'class': u'logging.StreamHandler', 
+            'formatter': u'brief' 
+        },
+        'file': {
+            'level': u'INFO',
+            'class': u'logging.FileHandler',
+            'filename': u'ipv8.log',
+            'formatter': u'brief'
+        }
+    },
+    'loggers': { 
+        'ipv8': { 
+            'handlers': [u'console', u'file'], 
+            'level': u'INFO' 
+        } 
+    } 
+}
+```
+
+This configuration sets the logging level to INFO and adds a file handler that writes log messages to a file named `ipv8.log`.
+
+## Working Directory
+
+The `working_directory` variable in the `config.py` file specifies the directory in which IPv8 should store its data. If not specified, IPv8 will use a temporary directory. 
+
+To specify a custom working directory, set the `working_directory` variable to the desired path:
+
+```python
+working_directory = '/path/to/data/directory'
+```
+
+If the directory does not exist, it will be created automatically when the `IPv8` instance is created.
+ 
